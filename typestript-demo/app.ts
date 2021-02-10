@@ -1,9 +1,11 @@
 // lib/app.ts
 import express from 'express';
 import mongodb from 'mongodb';
+require('dotenv').config();
 // Create a new express application instance
 const app: express.Application = express();
-const conn = mongodb.connect("mongodb+srv://leave-manage:12345@cluster0.gmd8g.mongodb.net/productManagement?retryWrites=true&w=majority", { useUnifiedTopology: true });
+let db_url:any = process.env.DB_URL;
+const conn = mongodb.connect(db_url, { useUnifiedTopology: true });
 (async()=>{
   app.get('/', async (req, res) =>{
     let mongoConn = await conn;
