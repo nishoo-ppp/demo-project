@@ -14,7 +14,10 @@ class EmployeeRouter {
         this.router.get("/delete/:employeeId", this.deleteEmployee);
         this.router.get("/native", this.getNativeEmployee);
         this.router.post("/native/add", this.addNativeEmployee);
+        this.router.post("/native/update/:employeeId", this.updateNativeEmployee);
+        this.router.get("/native/delete/:employeeId", this.deleteNativeEmployee);
     }
+
     async getNativeEmployee(req: Request, res: Response, next: NextFunction) {
         let result = await EmployeeNativeService.getEmployeeService();
         return res.status(200).json(result);
@@ -23,6 +26,15 @@ class EmployeeRouter {
         let data = req.body;
         let result = await EmployeeNativeService.addEmployeeService(data);
         // return res.status(HttpStatusCodes.ok).json(result);
+        return res.status(200).json(result);
+    }
+    async updateNativeEmployee(req: Request, res: Response, next: NextFunction) {
+        let data = req.body;
+        let result = await EmployeeNativeService.updateEmployeeService(data, req.params.employeeId);
+        return res.status(200).json(result);
+    }
+    async deleteNativeEmployee(req: Request, res: Response, next: NextFunction) {
+        let result = await EmployeeNativeService.deleteEmployeeService( req.params.employeeId );
         return res.status(200).json(result);
     }
     async addEmployee(req: Request, res: Response, next: NextFunction) {
