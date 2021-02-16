@@ -13,9 +13,16 @@ class EmployeeRouter {
         this.router.post("/update/:employeeId", this.updateEmployee);
         this.router.get("/delete/:employeeId", this.deleteEmployee);
         this.router.get("/native", this.getNativeEmployee);
+        this.router.post("/native/add", this.addNativeEmployee);
     }
     async getNativeEmployee(req: Request, res: Response, next: NextFunction) {
         let result = await EmployeeNativeService.getEmployeeService();
+        return res.status(200).json(result);
+    }
+    async addNativeEmployee(req: Request, res: Response, next: NextFunction) {
+        let data = req.body;
+        let result = await EmployeeNativeService.addEmployeeService(data);
+        // return res.status(HttpStatusCodes.ok).json(result);
         return res.status(200).json(result);
     }
     async addEmployee(req: Request, res: Response, next: NextFunction) {

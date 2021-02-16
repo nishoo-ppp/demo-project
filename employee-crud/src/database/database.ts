@@ -1,10 +1,12 @@
 import "reflect-metadata";
-const mysql = require("mysql");
+import * as mysql from 'mysql';
 const express = require("express");
 const app = express();
 import {createConnection, getConnection} from "typeorm";
+import { MysqlConnectionCredentialsOptions } from "typeorm/driver/mysql/MysqlConnectionCredentialsOptions";
 class Database {
     private static instance: any = null;
+    private mysqlnativepool:mysql.Pool;
     constructor() {
         const pool = mysql.createPool({
             connectionLimit: 10,
@@ -17,6 +19,7 @@ class Database {
             console.log('pool connection err >>>>>>' + err);
             process.exit(1);
         });
+        this.mysqlnativepool = pool;
         app.set("DB", pool);
     }
     public static async getDBInstance() {
@@ -41,6 +44,18 @@ class Database {
         }
         return Database.instance;
     }
+    public getDedicatedConnectionFromPool(): Promise<mysql.PoolConnection> {
+        const self = this;
+        return new Promise((resolve, reject) => {
+            self.mysqlnativepool.getConnection((err: any, connection: any) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(connection);
+            });
+        });
+    }
+
     
 }
 
