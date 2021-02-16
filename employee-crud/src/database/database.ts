@@ -20,7 +20,6 @@ class Database {
             process.exit(1);
         });
         this.mysqlnativepool = pool;
-        app.set("DB", pool);
     }
     public static async getDBInstance() {
         if (!Database.instance) {
