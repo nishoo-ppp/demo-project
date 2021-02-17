@@ -1,9 +1,10 @@
 import { getManager, Repository, getRepository } from 'typeorm';
 import { Employee } from '../entity/Employee';
-
+const {CreateRabbitMQConnection} = require("../rabbitMqConn/connection");
 class EmployeeService {
     
     public static  async addEmployeeService(data: any) {
+        console.log("add");
         const employee = new Employee();
         employee.name = data.name;
         employee.email = data.email;
@@ -21,6 +22,12 @@ class EmployeeService {
                     return saved;
                 });
                 message = "Employee has been saved";
+                const channel =  await CreateRabbitMQConnection.createConnection();
+                channel.assertQueue("employeeQueue", {
+                    durable: false
+                });
+                channel.sendToQueue("employeeQueue", Buffer.from(message));
+                console.log(message);
             }
             else {
                 message = "Employee already exist";

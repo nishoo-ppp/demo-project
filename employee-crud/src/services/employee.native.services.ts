@@ -1,7 +1,7 @@
 const {ExecuteQuery} = require("../shared/query-executer");
 const { EmployeeDataQueries } = require( '../queries/employee-data.query');
+const {CreateRabbitMQConnection} = require("../rabbitMqConn/connection");
 const lodash = require("lodash");
-const express = require("express");
 class EmployeeNativeService {
     public static  async getEmployeeService() {
        const qry = EmployeeDataQueries.getEmployeeRecords();
@@ -20,12 +20,17 @@ class EmployeeNativeService {
         datas.push([data.name,data.email,data.age,data.phone]);
         let message: string = '';
         try {
-            let qry = EmployeeDataQueries.checkEmployeeRecords(`email= ${data.email}`);
+            let qry = EmployeeDataQueries.checkEmployeeRecords(`email= '${data.email}'`);
             let getDuplicate = await ExecuteQuery(qry);
             if(lodash.isEmpty(getDuplicate)) {
                 const qry = EmployeeDataQueries.addEmployeeRecords();
                 await ExecuteQuery(qry, datas);
                 message = "Employee has been saved";
+                const channel =  await CreateRabbitMQConnection.createConnection();
+                channel.assertQueue("employeeQueue", {
+                    durable: false
+                });
+                channel.sendToQueue("employeeQueue", Buffer.from(message));
             }
             else {
                 message = "Employee already exist";
@@ -49,9 +54,10 @@ class EmployeeNativeService {
             await ExecuteQuery(qry);
             message = "Employee Updated Successfully";
             status = true;
+            
+            console.log(message);
         }
         else {
-            console.log('checkRecord not found');
             message = "Employee Not Found";
         }
         return { status: status, message: message};

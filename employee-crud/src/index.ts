@@ -7,10 +7,15 @@ import {Database} from "./database/database";
 const express = require("express");
 const app = express();
 const EmployeeRouter = require("./routes/EmployeeRouter");
-
+import {HttpErrorMiddleware} from './middlewares/http-error-middleware';
+import { resolve } from "url";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/employee", EmployeeRouter);
+app.get("*", (req, res)=>{
+    res.send("404 ERR");
+})
+app.use(HttpErrorMiddleware);
 (async()=>{
     await Database.getDBInstance();
     const port = process.env.PORT || 3003;
